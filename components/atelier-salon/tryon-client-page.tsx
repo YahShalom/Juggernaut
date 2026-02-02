@@ -1,0 +1,175 @@
+'use client';
+
+import { useState, useRef, useEffect } from 'react';
+import { saveHairTryon } from './actions';
+
+// Types remain the same...
+type Tenant = { id: string; name: string | null; slug: string; };
+type HairStyle = {
+    id: string;
+    name: string;
+    overlay_image_path: string | null;
+    default_scale: number | null;
+    default_offset_x: number | null;
+    default_offset_y: number | null;
+    default_rotation: number | null;
+    default_opacity: number | null;
+};
+type TryonClientPageProps = {
+    tenant: Tenant;
+    initialHairStyles: HairStyle[];
+};
+
+export default function TryonClientPage({ tenant, initialHairStyles }: TryonClientPageProps) {
+    const [selfie, setSelfie] = useState<string | null>(null);
+    const [selfieFile, setSelfieFile] = useState<File | null>(null);
+    const [activeStyle, setActiveStyle] = useState<HairStyle | null>(null);
+    const [isProcessing, setIsProcessing] = useState(false);
+
+    // Adjustment state...
+    const [scale, setScale] = useState(1);
+    const [offsetX, setOffsetX] = useState(0);
+    const [offsetY, setOffsetY] = useState(0);
+    const [rotation, setRotation] = useState(0);
+    const [opacity, setOpacity] = useState(1);
+
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (activeStyle) {
+            setScale(activeStyle.default_scale ?? 1);
+            setOffsetX(activeStyle.default_offset_x ?? 0);
+            setOffsetY(activeStyle.default_offset_y ?? 0);
+            setRotation(activeStyle.default_rotation ?? 0);
+            setOpacity(activeStyle.default_opacity ?? 1);
+        } else {
+            setScale(1); setOffsetX(0); setOffsetY(0); setRotation(0); setOpacity(1);
+        }
+    }, [activeStyle]);
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            setSelfieFile(file);
+            const reader = new FileReader();
+            reader.onload = (e) => setSelfie(e.target?.result as string);
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleSave = async () => {
+        if (!selfieFile || !activeStyle) {
+            alert('Please upload a selfie and select a hair style first.');
+            return;
+        }
+        setIsProcessing(true);
+
+        const formData = new FormData();
+        // CRITICAL: Pass the tenant's slug to the action
+        formData.append('tenantSlug', tenant.slug);
+        
+        formData.append('hairStyleId', activeStyle.id);
+        formData.append('selfieFile', selfieFile);
+        formData.append('appliedScale', String(scale));
+        formData.append('appliedOffsetX', String(offsetX));
+        formData.append('appliedOffsetY', String(offsetY));
+        formData.append('appliedRotation', String(rotation));
+        formData.append('appliedOpacity', String(opacity));
+
+        try {
+            const result = await saveHairTryon(formData);
+            if (result.success) {
+                alert('Try-on saved successfully!');
+            }
+        } catch (error) {
+            console.error(error);
+            alert(`Error: ${(error as Error).message}`);
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+    
+    const getSupabaseImageUrl = (path: string) => {
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+        return `${supabaseUrl}/storage/v1/object/public/${path}`;
+    }
+
+    return (
+        <div className="flex flex-col md:flex-row p-4 gap-8 max-w-7xl mx-auto">
+            {/* Left Column: Hair Style Catalog */}
+            <div className="w-full md:w-1/4">
+                <h2 className="text-xl font-bold mb-4">Select a Style</h2>
+                <div className="space-y-2">
+                    {initialHairStyles.map(style => (
+                        <button key={style.id} onClick={() => setActiveStyle(style)} className={`w-full text-left p-2 rounded ${activeStyle?.id === style.id ? 'bg-blue-500 text-white' : 'bg-gray-100'}`}>
+                            {style.name}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Center Column: Image Preview */}
+            <div className="w-full md:w-1/2 flex flex-col items-center">
+                <h1 className="text-3xl font-bold mb-2 text-center">Virtual Hair Try-On</h1>
+                <p className="text-gray-600 mb-4 text-center">Upload a selfie and see how you look!</p>
+                <div 
+                    className="relative w-full max-w-md aspect-square bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center border-2 border-dashed cursor-pointer"
+                    onClick={() => fileInputRef.current?.click()}
+                >
+                    {selfie ? (
+                        <img src={selfie} alt="User selfie" className="w-full h-full object-cover" />
+                    ) : (
+                        <span className="text-gray-500">Click to upload your photo</span>
+                    )}
+                    {selfie && activeStyle && activeStyle.overlay_image_path && (
+                        <img
+                            src={getSupabaseImageUrl(activeStyle.overlay_image_path)}
+                            alt="Hair overlay"
+                            className="absolute top-0 left-0 w-full h-full object-contain pointer-events-none"
+                            style={{
+                                transform: `translateX(${offsetX}px) translateY(${offsetY}px) scale(${scale}) rotate(${rotation}deg)`,
+                                opacity: opacity,
+                                transition: 'transform 0.1s ease-out, opacity 0.1s ease-out',
+                            }}
+                        />
+                    )}
+                    <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
+                </div>
+            </div>
+
+            {/* Right Column: Controls */}
+            <div className="w-full md:w-1/A4">
+                <h2 className="text-xl font-bold mb-4">Adjust Fit</h2>
+                <div className="space-y-4">
+                    <div>
+                        <label>Scale: {scale.toFixed(2)}</label>
+                        <input type="range" min="0.5" max="2" step="0.01" value={scale} onChange={e => setScale(parseFloat(e.target.value))} className="w-full" disabled={!activeStyle} />
+                    </div>
+                    <div>
+                        <label>Offset X: {offsetX}px</label>
+                        <input type="range" min="-150" max="150" step="1" value={offsetX} onChange={e => setOffsetX(parseInt(e.target.value))} className="w-full" disabled={!activeStyle} />
+                    </div>
+                    <div>
+                        <label>Offset Y: {offsetY}px</label>
+                        <input type="range" min="-150" max="150" step="1" value={offsetY} onChange={e => setOffsetY(parseInt(e.target.value))} className="w-full" disabled={!activeStyle} />
+                    </div>
+                    <div>
+                        <label>Rotation: {rotation}°</label>
+                        <input type="range" min="-45" max="45" step="1" value={rotation} onChange={e => setRotation(parseInt(e.target.value))} className="w-full" disabled={!activeStyle} />
+                    </div>
+                    <div>
+                        <label>Opacity: {opacity.toFixed(2)}</label>
+                        <input type="range" min="0" max="1" step="0.01" value={opacity} onChange={e => setOpacity(parseFloat(e.target.value))} className="w-full" disabled={!activeStyle} />
+                    </div>
+                    <button 
+                        onClick={handleSave}
+                        disabled={!selfie || !activeStyle || isProcessing}
+                        className="w-full bg-green-500 text-white p-2 rounded disabled:bg-gray-400"
+                    >
+                        {isProcessing ? 'Saving...' : 'Save Try-On'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
