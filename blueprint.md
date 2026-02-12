@@ -1,61 +1,50 @@
-# Project Blueprint: Admin ESA & Atelier Salon
+# Project Blueprint
 
 ## Overview
 
-This document outlines the architecture and features of the multi-tenant "Admin ESA" platform, with a specific focus on the "Atelier Salon Hair Try-On Lite" module built for the `perrydbeauty` tenant.
+This project is a Next.js application with Supabase integration for authentication and data storage. It includes an AI-powered feature called "Atelier" that provides personalized recommendations to users.
 
-## Core Platform Features
+## Features
 
-- **Multi-Tenancy:** The platform is built around a tenant model, where each tenant has its own unique slug for routing (e.g., `/[tenantSlug]/...`).
-- **Authentication:** Utilizes Supabase Auth with tenant-specific user roles (`owner`, `admin`, `tech`, `member`).
-- **Styling:** A skinning engine (`lib/skin/getSkin`) provides tenant-specific branding and CSS variables.
-- **Database:** Supabase PostgreSQL with Row Level Security (RLS) enforced on all tables to ensure data isolation between tenants.
+### Atelier "Run" Endpoint
 
-## Atelier Salon Module
+- **Endpoint:** `app/api/atelier/run/route.ts`
+- **Description:** This endpoint processes user requests for product recommendations.
+- **Authentication:** Verifies the user's session using Supabase Auth.
+- **Tenant Resolution:** Extracts the `tenant_id` from the user's JWT.
+- **Session Management:**
+    - Creates a new `atelier_sessions` and `atelier_inputs` record for a new session.
+    - Updates the `updated_at` timestamp for an existing session.
+- **AI Integration:**
+    - Calls the Opal API (a mock LLM workflow) with user inputs to get recommendations or clarification questions.
+- **Response Handling:**
+    - If Opal returns a clarification question, the endpoint responds with a `clarification` type JSON object.
+    - If Opal returns a recommendation, the endpoint:
+        1. Charges the tenant for the recommendation by calling a `enforce_usage` database function.
+        2. Inserts the recommendation into the `atelier_recommendations` table.
 
-This module provides a virtual hair try-on experience and is controlled by a feature flag.
+## Current Plan
 
-### Feature Flag
+### Atelier v1 End-to-End Implementation
 
-- **Name:** `atelier_salon_tryon_lite`
-- **Table:** `public.tenant_features`
-- **Scope:** Can be enabled or disabled on a per-tenant basis.
-- **Admin UI:** A toggle switch is available in the admin settings page (`/[tenantSlug]/admin/settings`) for tenant owners/admins to manage this feature.
+This plan outlines the steps to implement the full end-to-end user experience for Atelier v1 in the Admin ESA.
 
-### Admin Management UI
+1.  **API Implementation (`/api/atelier/run`)**
+    - The existing API will be leveraged to handle session creation, call the Opal service for recommendations, and record the outcomes in Supabase.
+    - The API will also be responsible for debiting credits from the user's account upon a successful recommendation.
 
-- **Categories (`/[tenantSlug]/admin/atelier-salon/categories`):**
-  - Allows admins to create, rename, and sort hair style categories.
-  - All operations are secured via Server Actions and RLS.
-- **Hair Styles (`/[tenantSlug]/admin/atelier-salon/hair-styles`):**
-  - A table lists all hairstyles for the tenant.
-  - Provides forms for creating and editing styles, including fields for:
-    - Name, description, category, status
-    - **Image Uploads:** Overlay (PNG) and Preview (JPG) images are uploaded to the `hair-overlays` Supabase Storage bucket.
-    - **Transform Sliders:** Default values for scale, offset, rotation, and opacity can be set.
+2.  **User Interface Overhaul**
+    - **Preference Snapshot:** A card will be displayed to the user summarizing their preferences before initiating a recommendation run.
+    - **Recommendation Display:** A new screen will be implemented to present the recommendation with a strict, structured layout. This will include:
+        - **Fit Confidence Score:** A metric indicating the confidence level of the recommendation.
+        - **Conditional Risk Note:** A note that appears if the fit confidence is below a certain threshold.
+    - **Feedback Mechanism:**
+        - Users will be able to provide feedback on recommendations using "Accept" (✅) and "Reject" (❌) buttons.
+        - A negative feedback loop will be implemented to capture reasons for rejection and trigger a revision flow.
 
-### Tenant-Facing Try-On Page
+3.  **Error Handling and Monetization**
+    - The application will gracefully handle "insufficient credits" errors.
+    - When a user runs out of credits, a paywall modal will be displayed, prompting them to upgrade their plan.
 
-- **Route:** `/[tenantSlug]/atelier/salon/tryon`
-- **Access Control:** 
-  1. The page is only accessible if the `atelier_salon_tryon_lite` feature flag is enabled for the tenant.
-  2. Requires the user to be logged in.
-- **Functionality:**
-  1. **Selfie Upload:** Users can upload a photo of themselves.
-  2. **Style Catalog:** Displays a grid of active hairstyles.
-  3. **Live Preview:** When a style is selected, its PNG overlay is rendered on top of the user's selfie.
-  4. **Adjustments:** Users can manipulate the overlay using sliders for scale, position, rotation, and opacity.
-  5. **Save:** The final try-on (selfie path, style ID, and applied transforms) is saved to the `public.hair_tryons` table. Selfies are stored in the private `tryon-selfies` bucket.
-
-### Demo Mode
-
-- **Activation:** Enabled by setting the `DEMO_MODE=true` environment variable.
-- **Behavior:** When active, a "Demo Mode" banner is displayed at the top of all pages **only** for the `perrydbeauty` tenant.
-
-## Code Quality and Linting Fixes
-
-- **Corrected Linter Configuration:** Fixed the `eslint.config.mjs` file with the proper `import` syntax.
-- **Replaced `<a>` with `<Link>`:** Updated `app/esa/layout.tsx` and `app/invite/[token]/page.tsx` to use the Next.js `<Link>` component for internal navigation, which is the recommended practice for Next.js applications.
-- **Removed Unused Code:** Removed the unused `cookies` import from `app/auth/actions.ts` and the unused `styles` and `setStyles` state variables from `components/admin/hair-styles-client-page.tsx`.
-- **Optimized Images:** Replaced the standard `<img>` tags with the `next/image` `Image` component in `components/admin/hair-styles-client-page.tsx` and `components/atelier-salon/tryon-client-page.tsx` for better performance and to resolve linting warnings. I also updated the `next.config.mjs` to allow images from your Supabase storage.
-- **Corrected a Typo:** Fixed a layout typo in `components/atelier-salon/tryon-client-page.tsx`.
+4.  **Testing and Validation**
+    - Once implemented, the end-to-end flow will be tested to ensure all components work together as expected.

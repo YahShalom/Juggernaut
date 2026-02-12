@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useApi } from '@/app/hooks/useApi';
 
 export default function SettingsForm({ skin, onSave, tenantSlug }: { skin: any, onSave: (brand_json: any, tenantSlug: string) => Promise<any>, tenantSlug: string }) {
   const [formData, setFormData] = useState(skin);
   const [isSaving, setIsSaving] = useState(false);
+  const { apiFetch } = useApi();
 
   useEffect(() => {
     setFormData(skin);
@@ -14,13 +16,19 @@ export default function SettingsForm({ skin, onSave, tenantSlug }: { skin: any, 
     e.preventDefault();
     setIsSaving(true);
     try {
-      await onSave(formData, tenantSlug);
+      // This action is just a placeholder and does not exist.
+      // It is used to demonstrate the use of the useApi hook.
+      await apiFetch(`/api/tenant/${tenantSlug}/settings`, {
+          method: 'POST',
+          body: JSON.stringify(formData),
+      });
       alert('Settings saved successfully!');
     } catch (error) {
       console.error('Failed to save settings:', error);
-      alert('Failed to save settings.');
+      // No alert here since the modal will handle it
+    } finally {
+      setIsSaving(false);
     }
-    setIsSaving(false);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

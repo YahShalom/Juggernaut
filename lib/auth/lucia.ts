@@ -1,5 +1,3 @@
-'use server';
-
 import { Lucia } from 'lucia';
 import { DrizzleSQLiteAdapter } from '@lucia-auth/adapter-drizzle';
 import { db } from '@/lib/db';

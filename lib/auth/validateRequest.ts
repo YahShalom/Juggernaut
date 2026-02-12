@@ -1,5 +1,3 @@
-'use server';
-
 import { lucia } from '@/lib/auth/lucia';
 import { cookies } from 'next/headers';
 import { cache } from 'react';
