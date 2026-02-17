@@ -1,39 +1,18 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 
-export async function GET(req: Request) {
-  const url = new URL(req.url);
+export async function GET(request: Request) {
+  console.log("CALLBACK URL:", request.url);
+  const { searchParams, origin } = new URL(request.url);
+  const code = searchParams.get("code");
+  const workspace = searchParams.get("workspace") ?? "";
 
-  // Supabase magic link typically includes ?code=...
-  const code = url.searchParams.get("code");
-  const tenantSlug = url.searchParams.get("tenantSlug") || "";
+  if (!code) return NextResponse.redirect(`${origin}/auth/login?error=missing_code`);
 
-  if (!code) {
-    return NextResponse.redirect(new URL("/?error=missing_code", url.origin));
-  }
-
-  const supabase = await createSupabaseServerClient();
-
+  const supabase = createClient();
   const { error } = await supabase.auth.exchangeCodeForSession(code);
 
-  if (error) {
-    return NextResponse.redirect(
-      new URL(`/auth/error?msg=${encodeURIComponent(error.message)}`, url.origin)
-    );
-  }
+  if (error) return NextResponse.redirect(`${origin}/auth/login?error=exchange_failed`);
 
-  // store tenant context
-  if (tenantSlug) {
-    const cookieStore = await cookies()
-    cookieStore.set("esa_workspace", tenantSlug, {
-      path: "/",
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-    });
-  }
-
-  // send them into the tenant app
-  return NextResponse.redirect(new URL(tenantSlug ? `/${tenantSlug}` : "/", url.origin));
+  return NextResponse.redirect(`${origin}/?workspace=${encodeURIComponent(workspace)}`);
 }
