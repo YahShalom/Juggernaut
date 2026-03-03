@@ -39,3 +39,37 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Node / Next
+node_modules/
+.next/
+out/
+dist/
+build/
+coverage/
+.turbo/
+.cache/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# OS / editor
+.DS_Store
+Thumbs.db
+
+# Firebase / Vercel
+.firebase/
+.vercel/
+
+# Large binaries / archives
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z
+*.iso
+
+# If you accidentally copied a Node distribution
+node-v*/
