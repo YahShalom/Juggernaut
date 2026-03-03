@@ -4,7 +4,7 @@ import { createServerClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
 export async function createShadowTenant() {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const { error } = await supabase.rpc('create_shadow_tenant')
 
   if (error) {
@@ -17,7 +17,7 @@ export async function createShadowTenant() {
 }
 
 export async function seedShadowData() {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const { error } = await supabase.rpc('seed_shadow_data')
 
   if (error) {

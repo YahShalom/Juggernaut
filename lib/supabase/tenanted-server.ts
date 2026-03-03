@@ -13,7 +13,7 @@ import { getTenantContext } from '@/lib/tenant-context';
  *
  * @returns An object containing the Supabase client and the resolved tenant ID.
  */
-export function createTenantedSupabaseServerClient() {
+export async function createTenantedSupabaseServerClient() {
   const { tenant, errorMessage } = getTenantContext();
 
   // CRITICAL: Halt if tenant context is invalid
@@ -21,7 +21,7 @@ export function createTenantedSupabaseServerClient() {
     throw new Error(errorMessage || 'Tenant ID is missing. Cannot create a tenanted Supabase client.');
   }
 
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

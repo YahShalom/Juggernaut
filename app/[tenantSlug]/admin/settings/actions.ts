@@ -4,7 +4,7 @@ import { createTenantedSupabaseServerClient } from '@/lib/supabase/tenanted-serv
 import { revalidatePath } from 'next/cache';
 
 export async function saveBrand(brand_json: any, tenantSlug: string) {
-  const { supabase, tenantId } = createTenantedSupabaseServerClient();
+  const { supabase, tenantId } = await createTenantedSupabaseServerClient();
   const { data, error } = await supabase
     .from('tenants')
     .update({ brand_json })

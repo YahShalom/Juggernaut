@@ -30,12 +30,12 @@ export const PlanLimitProvider: React.FC<PlanLimitProviderProps> = ({ children }
   const [failedRequest, setFailedRequest] = useState<(() => Promise<any>) | null>(null);
   const params = useParams();
   const router = useRouter();
-  const tenantId = params.tenantId as string;
+  const tenantSlug = params.tenantSlug as string;
 
   const fetchBillingSummary = useCallback(async () => {
-    if (!tenantId) return;
+    if (!tenantSlug) return;
     try {
-      const response = await fetch(`/api/tenant/${tenantId}/billing-summary`);
+      const response = await fetch(`/api/tenant/${tenantSlug}/billing-summary`);
       if (response.ok) {
         const data = await response.json();
         setBillingSummary(data);
@@ -43,7 +43,7 @@ export const PlanLimitProvider: React.FC<PlanLimitProviderProps> = ({ children }
     } catch (error) {
       console.error("Failed to fetch billing summary:", error);
     }
-  }, [tenantId]);
+  }, [tenantSlug]);
 
   const triggerLimitModal = useCallback((request: () => Promise<any>) => {
     setFailedRequest(() => request);
@@ -61,7 +61,7 @@ export const PlanLimitProvider: React.FC<PlanLimitProviderProps> = ({ children }
     const res = await fetch('/api/billing/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tenantId }),
+        body: JSON.stringify({ tenantId: tenantSlug }),
     });
     const { url } = await res.json();
     if (url) {
@@ -74,7 +74,7 @@ export const PlanLimitProvider: React.FC<PlanLimitProviderProps> = ({ children }
     const res = await fetch('/api/billing/portal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tenantId }),
+        body: JSON.stringify({ tenantId: tenantSlug }),
     });
     const { url } = await res.json();
     if (url) {

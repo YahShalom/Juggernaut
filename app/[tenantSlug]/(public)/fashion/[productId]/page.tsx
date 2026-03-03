@@ -1,7 +1,7 @@
 import { createTenantedSupabaseServerClient } from '@/lib/supabase/tenanted-server';
 
 export default async function FashionProductPage({ params }: { params: { productId: string, tenantSlug: string } }) {
-  const { supabase } = createTenantedSupabaseServerClient();
+  const { supabase } = await createTenantedSupabaseServerClient();
 
   const { data: offering } = await supabase
     .from('offerings')

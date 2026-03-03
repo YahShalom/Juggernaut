@@ -3,7 +3,7 @@ import { saveOffering, deleteOffering } from './actions';
 import OfferingsClient from './OfferingsClient';
 
 export default async function FashionOfferingsPage({ params }: { params: { tenantSlug: string } }) {
-  const { supabase } = createTenantedSupabaseServerClient();
+  const { supabase } = await createTenantedSupabaseServerClient();
 
   const { data: offerings, error } = await supabase
     .from('offerings')

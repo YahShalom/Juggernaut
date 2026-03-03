@@ -24,9 +24,9 @@ const OfferingForm = ({ offering, onSave, tenantSlug }: { offering?: any, onSave
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white/10 backdrop-blur-lg rounded-lg shadow-lg p-6 mt-4">
+    <form onSubmit={handleSubmit} className="glass-panel mt-4 p-6">
       {/* Form fields... */}
-      <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg">Save</button>
+      <button type="submit" className="btn-primary-gradient rounded-lg px-4 py-2">Save</button>
     </form>
   );
 };
@@ -58,21 +58,21 @@ export default function OfferingsClient({ initialOfferings, saveAction, deleteAc
   };
 
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-8">Manage Fashion Offerings</h1>
+    <div className="glass-panel p-8">
+      <h1 className="mb-8 text-3xl font-bold text-[var(--foreground)]">Manage Fashion Offerings</h1>
 
-      <h2 className="text-2xl font-bold mt-8 mb-4">Add New Offering</h2>
+      <h2 className="mb-4 mt-8 text-2xl font-bold text-[var(--foreground)]">Add New Offering</h2>
       <OfferingForm onSave={handleSave} tenantSlug={tenantSlug} />
 
-      <h2 className="text-2xl font-bold mt-8 mb-4">Existing Offerings</h2>
+      <h2 className="mb-4 mt-8 text-2xl font-bold text-[var(--foreground)]">Existing Offerings</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {offerings.map((offering) => (
-          <div key={offering.id} className="bg-white/10 backdrop-blur-lg rounded-lg shadow-lg p-6">
-            <h2 className="text-2xl font-bold mb-2">{offering.name}</h2>
-            <p className="text-lg mb-4">{offering.description}</p>
+          <div key={offering.id} className="glass-panel p-6">
+            <h2 className="mb-2 text-2xl font-bold text-[var(--foreground)]">{offering.name}</h2>
+            <p className="mb-4 text-lg text-[var(--muted-foreground)]">{offering.description}</p>
             <div className="flex justify-between items-center">
-              <p className="text-xl font-bold">${offering.price}</p>
-              <button onClick={() => handleDelete(offering.id, tenantSlug)} className="bg-red-500 text-white px-4 py-2 rounded-lg">Delete</button>
+              <p className="text-xl font-bold text-[var(--foreground)]">${offering.price}</p>
+              <button onClick={() => handleDelete(offering.id, tenantSlug)} className="rounded-lg bg-red-500 px-4 py-2 text-white">Delete</button>
             </div>
             <OfferingForm offering={offering} onSave={handleSave} tenantSlug={tenantSlug} />
           </div>

@@ -47,7 +47,7 @@ export async function saveHairTryon(formData: FormData) {
   const { data: { user } } = await authClient.auth.getUser();
   if (!user) throw new Error('Authentication is required to save a try-on.');
 
-  const { supabase, tenantId } = createTenantedSupabaseServerClient();
+  const { supabase, tenantId } = await createTenantedSupabaseServerClient();
 
   const selfieFile = formData.get('selfieFile') as File;
   if (!selfieFile || selfieFile.size === 0) {

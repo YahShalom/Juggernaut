@@ -1,72 +1,55 @@
-"use server";
-
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
-export default async function CallbackPage({ searchParams }: any) {
-  const params = searchParams || {};
-  const code = params.code as string | undefined;
-  const token_hash = params.token_hash as string | undefined;
-  const type = params.type as string | undefined;
-  const error = params.error as string | undefined;
-  const error_code = params.error_code as string | undefined;
-  const error_description = params.error_description as string | undefined;
+type CallbackSearchParams = {
+  code?: string;
+  token_hash?: string;
+  type?: "recovery" | "email" | "signup" | string;
+  next?: string;
+  error?: string;
+  error_description?: string;
+};
 
-  // Crash-safe rendering: always return a page with debug info
-  try {
-    if (error) {
-      return (
-        <div className="p-6">
-          <h1 className="text-xl font-bold">Auth Callback - Error</h1>
-          <pre className="mt-4 bg-gray-50 p-4 rounded">{JSON.stringify({ error, error_code, error_description, params }, null, 2)}</pre>
-        </div>
-      );
-    }
+function getSafeNext(next?: string) {
+  if (!next || !next.startsWith("/")) return "/usage";
+  return next;
+}
 
-    // If no exchange params present, just show the params
-    if (!code && !token_hash) {
-      return (
-        <div className="p-6">
-          <h1 className="text-xl font-bold">Auth Callback - No Code</h1>
-          <pre className="mt-4 bg-gray-50 p-4 rounded">{JSON.stringify({ params }, null, 2)}</pre>
-        </div>
-      );
-    }
+export default async function CallbackPage({
+  searchParams,
+}: {
+  searchParams: Promise<CallbackSearchParams>;
+}) {
+  const params = await searchParams;
+  const { code, token_hash, type, error } = params;
 
-    const supabase = await createClient();
-
-    if (code) {
-      const resp = await supabase.auth.exchangeCodeForSession(code);
-      return (
-        <div className="p-6">
-          <h1 className="text-xl font-bold">Auth Callback - Code Exchange</h1>
-          <pre className="mt-4 bg-gray-50 p-4 rounded">{JSON.stringify({ params, resp }, null, 2)}</pre>
-        </div>
-      );
-    }
-
-    // token_hash + type flow
-    if (token_hash && type) {
-      const resp = await (supabase.auth as any).verifyOtp({ token_hash, type });
-      return (
-        <div className="p-6">
-          <h1 className="text-xl font-bold">Auth Callback - OTP Verify</h1>
-          <pre className="mt-4 bg-gray-50 p-4 rounded">{JSON.stringify({ params, resp }, null, 2)}</pre>
-        </div>
-      );
-    }
-
-    return (
-      <div className="p-6">
-        <h1 className="text-xl font-bold">Auth Callback</h1>
-        <pre className="mt-4 bg-gray-50 p-4 rounded">{JSON.stringify({ params }, null, 2)}</pre>
-      </div>
-    );
-  } catch (e: any) {
-    return (
-      <div className="p-6">
-        <h1 className="text-xl font-bold">Auth Callback - Crash</h1>
-        <pre className="mt-4 bg-red-50 p-4 rounded">{JSON.stringify({ error: String(e), params }, null, 2)}</pre>
-      </div>
-    );
+  if (error) {
+    redirect(`/login?error=${encodeURIComponent("Authentication failed.")}`);
   }
+
+  const nextPath = getSafeNext(params.next);
+  const supabase = await createClient();
+
+  if (code) {
+    const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(
+      code
+    );
+    if (exchangeError) {
+      redirect(`/login?error=${encodeURIComponent(exchangeError.message)}`);
+    }
+    redirect(nextPath);
+  }
+
+  if (token_hash && type) {
+    const { error: verifyError } = await supabase.auth.verifyOtp({
+      token_hash,
+      type: type as "recovery" | "email" | "signup",
+    });
+    if (verifyError) {
+      redirect(`/login?error=${encodeURIComponent(verifyError.message)}`);
+    }
+    redirect(nextPath);
+  }
+
+  redirect("/login");
 }

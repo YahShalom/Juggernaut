@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { apiGuard } from "@/lib/auth/apiGuard";
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -7,7 +8,10 @@ const supabaseAdmin = createClient(
 );
 
 export async function POST(req: Request, { params }: { params: { tenantId: string } }) {
-  const tenantId = params.tenantId;
+  const guard = await apiGuard(req, { tenantIdFrom: "params", params });
+  if (!guard.ok) return guard.response;
+
+  const { tenantId } = guard;
   const { qty = 1 } = await req.json();
 
   try {

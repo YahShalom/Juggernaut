@@ -16,7 +16,7 @@ export async function createCategory(formData: FormData) {
     roles: ['owner', 'admin'],
   });
 
-  const { supabase, tenantId } = createTenantedSupabaseServerClient();
+  const { supabase, tenantId } = await createTenantedSupabaseServerClient();
   const { data, error } = await supabase
     .from('hair_style_categories')
     .insert([{ category_name: name, tenant_id: tenantId }])
@@ -40,7 +40,7 @@ export async function deleteCategory(formData: FormData) {
     roles: ['owner', 'admin'],
   });
 
-  const { supabase } = createTenantedSupabaseServerClient();
+  const { supabase } = await createTenantedSupabaseServerClient();
   const { error } = await supabase.from('hair_style_categories').delete().eq('id', id);
 
   if (error) {
@@ -61,7 +61,7 @@ export async function saveHairStyle(formData: FormData) {
         roles: ['owner', 'admin', 'tech'],
     });
 
-    const { supabase, tenantId } = createTenantedSupabaseServerClient();
+    const { supabase, tenantId } = await createTenantedSupabaseServerClient();
 
     const hairStyleData = {
         id: formData.get('id') ? Number(formData.get('id')) : undefined,
@@ -105,7 +105,7 @@ export async function deleteHairStyle(formData: FormData) {
     return { success: false, error: 'Hair Style ID is required.' };
   }
 
-  const { supabase } = createTenantedSupabaseServerClient();
+  const { supabase } = await createTenantedSupabaseServerClient();
   const { error } = await supabase.from('hair_styles').delete().eq('id', id);
 
   if (error) {

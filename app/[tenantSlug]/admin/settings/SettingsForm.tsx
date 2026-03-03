@@ -53,13 +53,13 @@ export default function SettingsForm({ skin, onSave, tenantSlug }: { skin: any, 
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-white/10 backdrop-blur-lg rounded-lg shadow-lg p-6 mt-4"
+      className="glass-panel mt-4 p-6"
     >
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label
             htmlFor="primary_color"
-            className="block text-lg mb-2"
+            className="mb-2 block text-lg text-[var(--foreground)]"
           >
             Primary Color
           </label>
@@ -69,13 +69,13 @@ export default function SettingsForm({ skin, onSave, tenantSlug }: { skin: any, 
             name="colors.primary"
             value={formData.colors.primary}
             onChange={handleChange}
-            className="w-full p-2 rounded-lg bg-gray-800/50"
+            className="w-full rounded-lg border border-[var(--input)] bg-[var(--background)]/70 p-2"
           />
         </div>
         <div>
           <label
             htmlFor="secondary_color"
-            className="block text-lg mb-2"
+            className="mb-2 block text-lg text-[var(--foreground)]"
           >
             Secondary Color
           </label>
@@ -85,7 +85,7 @@ export default function SettingsForm({ skin, onSave, tenantSlug }: { skin: any, 
             name="colors.secondary"
             value={formData.colors.secondary}
             onChange={handleChange}
-            className="w-full p-2 rounded-lg bg-gray-800/50"
+            className="w-full rounded-lg border border-[var(--input)] bg-[var(--background)]/70 p-2"
           />
         </div>
       </div>
@@ -93,7 +93,7 @@ export default function SettingsForm({ skin, onSave, tenantSlug }: { skin: any, 
       <button
         type="submit"
         disabled={isSaving}
-        className="bg-blue-500 text-white px-4 py-2 rounded-lg mt-4 disabled:opacity-50"
+        className="btn-primary-gradient mt-4 rounded-lg px-4 py-2 disabled:opacity-50"
       >
         {isSaving ? 'Saving...' : 'Save'}
       </button>

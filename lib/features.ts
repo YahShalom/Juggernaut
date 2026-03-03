@@ -12,7 +12,7 @@ import { createTenantedSupabaseServerClient } from './supabase/tenanted-server';
 export async function isFeatureEnabled(featureKey: string): Promise<boolean> {
   try {
     // Get the tenant-scoped client. This will throw if context is missing.
-    const { supabase, tenantId } = createTenantedSupabaseServerClient();
+    const { supabase, tenantId } = await createTenantedSupabaseServerClient();
     
     const { error, count } = await supabase
       .from('tenant_features')

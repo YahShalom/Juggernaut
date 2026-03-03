@@ -5,7 +5,7 @@ import { BillingBanner } from '@/app/components/billing/BillingBanner';
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
     <PlanLimitProvider>
-      <div className="container mx-auto p-4">
+      <div className="app-shell">
         <BillingBanner />
         {children}
       </div>

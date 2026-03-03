@@ -1,4 +1,3 @@
-import { createClient } from '@/lib/supabase/server';
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
@@ -6,10 +5,7 @@ export async function middleware(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith('/_debug')) {
     return NextResponse.next();
   }
-
-  const supabase = await createClient();
-  const { response } = await supabase.auth.getSession();
-  return response;
+  return NextResponse.next();
 }
 
 export const config = {

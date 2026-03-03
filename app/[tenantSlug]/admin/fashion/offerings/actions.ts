@@ -4,7 +4,7 @@ import { createTenantedSupabaseServerClient } from '@/lib/supabase/tenanted-serv
 import { revalidatePath } from 'next/cache';
 
 export async function saveOffering(offeringData: any, tenantSlug: string) {
-  const { supabase, tenantId } = createTenantedSupabaseServerClient();
+  const { supabase, tenantId } = await createTenantedSupabaseServerClient();
   const { data, error } = await supabase
     .from('offerings')
     .upsert([{ ...offeringData, type: 'fashion', tenant_id: tenantId }]);
@@ -19,7 +19,7 @@ export async function saveOffering(offeringData: any, tenantSlug: string) {
 }
 
 export async function deleteOffering(offeringId: any, tenantSlug: string) {
-  const { supabase } = createTenantedSupabaseServerClient();
+  const { supabase } = await createTenantedSupabaseServerClient();
   const { data, error } = await supabase
     .from('offerings')
     .delete()

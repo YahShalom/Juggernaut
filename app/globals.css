@@ -2,48 +2,48 @@
 
 @layer base {
   :root {
-    --background: hsl(0 0% 100%);
-    --foreground: hsl(222.2 84% 4.9%);
-    --card: hsl(0 0% 100%);
-    --card-foreground: hsl(222.2 84% 4.9%);
+    --background: hsl(0 0% 99%);
+    --foreground: hsl(216 56% 18%);
+    --card: hsl(0 0% 100% / 0.9);
+    --card-foreground: hsl(216 56% 18%);
     --popover: hsl(0 0% 100%);
-    --popover-foreground: hsl(222.2 84% 4.9%);
-    --primary: hsl(222.2 47.4% 11.2%);
-    --primary-foreground: hsl(210 40% 98%);
-    --secondary: hsl(210 40% 96.1%);
-    --secondary-foreground: hsl(222.2 47.4% 11.2%);
-    --muted: hsl(210 40% 96.1%);
-    --muted-foreground: hsl(215.4 16.3% 46.9%);
-    --accent: hsl(210 40% 96.1%);
-    --accent-foreground: hsl(222.2 47.4% 11.2%);
-    --destructive: hsl(0 84.2% 60.2%);
-    --destructive-foreground: hsl(210 40% 98%);
-    --border: hsl(214.3 31.8% 91.4%);
-    --input: hsl(214.3 31.8% 91.4%);
-    --ring: hsl(222.2 84% 4.9%);
+    --popover-foreground: hsl(216 56% 18%);
+    --primary: hsl(214 88% 38%);
+    --primary-foreground: hsl(0 0% 100%);
+    --secondary: hsl(0 0% 100%);
+    --secondary-foreground: hsl(216 56% 18%);
+    --muted: hsl(216 25% 95%);
+    --muted-foreground: hsl(217 25% 34%);
+    --accent: hsl(45 100% 47%);
+    --accent-foreground: hsl(216 56% 18%);
+    --destructive: hsl(0 72% 50%);
+    --destructive-foreground: hsl(0 0% 100%);
+    --border: hsl(214 32% 82%);
+    --input: hsl(214 32% 82%);
+    --ring: hsl(45 100% 47%);
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: hsl(222.2 84% 4.9%);
-    --foreground: hsl(210 40% 98%);
-    --card: hsl(222.2 84% 4.9%);
-    --card-foreground: hsl(210 40% 98%);
-    --popover: hsl(222.2 84% 4.9%);
-    --popover-foreground: hsl(210 40% 98%);
-    --primary: hsl(210 40% 98%);
-    --primary-foreground: hsl(222.2 47.4% 11.2%);
-    --secondary: hsl(217.2 32.6% 17.5%);
-    --secondary-foreground: hsl(210 40% 98%);
-    --muted: hsl(217.2 32.6% 17.5%);
-    --muted-foreground: hsl(215 20.2% 65.1%);
-    --accent: hsl(217.2 32.6% 17.5%);
-    --accent-foreground: hsl(210 40% 98%);
-    --destructive: hsl(0 62.8% 30.6%);
-    --destructive-foreground: hsl(210 40% 98%);
-    --border: hsl(217.2 32.6% 17.5%);
-    --input: hsl(217.2 32.6% 17.5%);
-    --ring: hsl(212.7 26.8% 83.9%);
+    --background: hsl(218 57% 11%);
+    --foreground: hsl(0 0% 100%);
+    --card: hsl(217 53% 16% / 0.9);
+    --card-foreground: hsl(0 0% 100%);
+    --popover: hsl(217 53% 16%);
+    --popover-foreground: hsl(0 0% 100%);
+    --primary: hsl(45 100% 52%);
+    --primary-foreground: hsl(218 57% 11%);
+    --secondary: hsl(215 54% 20%);
+    --secondary-foreground: hsl(0 0% 100%);
+    --muted: hsl(215 45% 20%);
+    --muted-foreground: hsl(210 28% 82%);
+    --accent: hsl(214 86% 62%);
+    --accent-foreground: hsl(218 57% 11%);
+    --destructive: hsl(0 82% 58%);
+    --destructive-foreground: hsl(0 0% 100%);
+    --border: hsl(216 33% 33%);
+    --input: hsl(216 33% 33%);
+    --ring: hsl(45 100% 52%);
   }
 
   * {
@@ -51,7 +51,137 @@
   }
   
   body {
-    background-color: var(--background);
+    background:
+      radial-gradient(circle at 16% 12%, hsl(45 100% 85% / 0.72), transparent 30%),
+      radial-gradient(circle at 84% 18%, hsl(214 93% 82% / 0.56), transparent 32%),
+      linear-gradient(135deg, hsl(0 0% 100%), hsl(212 65% 97%)),
+      var(--background);
     color: var(--foreground);
+    min-height: 100vh;
+  }
+
+  .dark body {
+    background:
+      radial-gradient(circle at 15% 8%, hsl(45 100% 44% / 0.26), transparent 34%),
+      radial-gradient(circle at 84% 12%, hsl(214 80% 46% / 0.36), transparent 38%),
+      linear-gradient(145deg, hsl(221 64% 14%), hsl(214 69% 11%)),
+      var(--background);
+  }
+}
+
+@layer utilities {
+  @keyframes orbit-slow {
+    0% {
+      transform: rotate(0deg) scale(1);
+    }
+    50% {
+      transform: rotate(180deg) scale(1.06);
+    }
+    100% {
+      transform: rotate(360deg) scale(1);
+    }
+  }
+
+  @keyframes float-slow {
+    0% {
+      transform: translateY(0px) translateX(0px);
+    }
+    50% {
+      transform: translateY(-16px) translateX(8px);
+    }
+    100% {
+      transform: translateY(0px) translateX(0px);
+    }
+  }
+
+  .animate-orbit-slow {
+    animation: orbit-slow 28s linear infinite;
+  }
+
+  .animate-float-slow {
+    animation: float-slow 12s ease-in-out infinite;
+  }
+
+  .app-shell {
+    @apply mx-auto max-w-7xl px-4 py-6 md:px-6 lg:px-8;
+  }
+
+  .glass-panel {
+    background: linear-gradient(
+      135deg,
+      hsl(0 0% 100% / 0.72),
+      hsl(214 88% 97% / 0.6)
+    );
+    border: 1px solid hsl(var(--border));
+    @apply rounded-2xl shadow-lg backdrop-blur-md;
+  }
+
+  .dark .glass-panel {
+    background: linear-gradient(
+      135deg,
+      hsl(217 53% 18% / 0.78),
+      hsl(214 56% 14% / 0.72)
+    );
+    border: 1px solid hsl(var(--border));
+  }
+
+  .kpi-card {
+    background: linear-gradient(
+      135deg,
+      hsl(0 0% 100% / 0.72),
+      hsl(214 88% 97% / 0.6)
+    );
+    border: 1px solid hsl(var(--border));
+    @apply rounded-2xl p-5 shadow-lg backdrop-blur-md;
+  }
+
+  .dark .kpi-card {
+    background: linear-gradient(
+      135deg,
+      hsl(217 53% 18% / 0.78),
+      hsl(214 56% 14% / 0.72)
+    );
+    border: 1px solid hsl(var(--border));
+  }
+
+  .table-shell {
+    background: linear-gradient(
+      135deg,
+      hsl(0 0% 100% / 0.72),
+      hsl(214 88% 97% / 0.6)
+    );
+    border: 1px solid hsl(var(--border));
+    @apply overflow-hidden rounded-2xl shadow-lg backdrop-blur-md;
+  }
+
+  .dark .table-shell {
+    background: linear-gradient(
+      135deg,
+      hsl(217 53% 18% / 0.78),
+      hsl(214 56% 14% / 0.72)
+    );
+    border: 1px solid hsl(var(--border));
+  }
+
+  .table-head {
+    background: hsl(214 55% 92% / 0.7);
+  }
+
+  .dark .table-head {
+    background: hsl(216 48% 20% / 0.75);
+  }
+
+  .table-row {
+    border-top: 1px solid hsl(var(--border));
+  }
+
+  .btn-primary-gradient {
+    background: linear-gradient(
+      90deg,
+      hsl(214 88% 38%),
+      hsl(214 78% 44%),
+      hsl(45 100% 52%)
+    );
+    @apply text-white;
   }
 }

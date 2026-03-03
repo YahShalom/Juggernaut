@@ -16,14 +16,14 @@ export const BillingBanner: React.FC = () => {
   const [entitlements, setEntitlements] = useState<Entitlements | null>(null);
   const [error, setError] = useState<string | null>(null);
   const params = useParams();
-  const tenantId = params.tenantSlug;
+  const tenantSlug = params.tenantSlug as string;
 
   useEffect(() => {
-    if (!tenantId) return;
+    if (!tenantSlug) return;
 
     const fetchEntitlements = async () => {
       try {
-        const response = await fetch(`/api/tenant/${tenantId}/entitlements`);
+        const response = await fetch(`/api/tenant/${tenantSlug}/entitlements`);
         if (!response.ok) {
           throw new Error('Failed to fetch entitlements');
         }
@@ -35,7 +35,7 @@ export const BillingBanner: React.FC = () => {
     };
 
     fetchEntitlements();
-  }, [tenantId]);
+  }, [tenantSlug]);
 
   if (error) {
     return <div className="bg-red-500/20 text-red-300 p-4 rounded-md text-center">Error: {error}</div>;

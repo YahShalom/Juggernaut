@@ -1,15 +1,7 @@
 "use client";
 
 import React from "react";
-import {
-  Button,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@saas/shared/components/ui";
+import { Button } from "@/components/ui/button";
 
 interface UpgradeRequiredModalProps {
   isOpen: boolean;
@@ -35,17 +27,15 @@ export const UpgradeRequiredModal: React.FC<UpgradeRequiredModalProps> = ({
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Upgrade Required</DialogTitle>
-          <DialogDescription>
-            You have reached the request limit for your current plan. Please
-            upgrade to continue.
-          </DialogDescription>
-        </DialogHeader>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="w-full max-w-lg rounded-lg bg-white p-6 shadow-2xl">
+        <h2 className="text-xl font-semibold text-gray-900">Upgrade Required</h2>
+        <p className="mt-2 text-sm text-gray-700">
+          You have reached the request limit for your current plan. Please
+          upgrade to continue.
+        </p>
         {billingSummary && (
-          <div className="my-4 text-sm">
+          <div className="my-4 text-sm text-gray-800">
             <p>
               <strong>Current Plan:</strong> {billingSummary.plan_name}
             </p>
@@ -55,14 +45,14 @@ export const UpgradeRequiredModal: React.FC<UpgradeRequiredModalProps> = ({
             </p>
           </div>
         )}
-        <DialogFooter>
+        <div className="mt-6 flex justify-end gap-2">
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
           <Button onClick={onManageBilling}>Manage Billing</Button>
           <Button onClick={onUpgrade}>Upgrade Plan</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </div>
+      </div>
+    </div>
   );
 };

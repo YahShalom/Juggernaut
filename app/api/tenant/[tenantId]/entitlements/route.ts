@@ -6,18 +6,21 @@ export async function GET(
   { params }: { params: { tenantId: string } }
 ) {
   const supabase = await createClient();
-  const { tenantId } = params;
+  const { tenantId: tenantRef } = params;
 
-  if (!tenantId) {
+  if (!tenantRef) {
     return new NextResponse(JSON.stringify({ error: "Tenant ID is required" }), {
       status: 400,
     });
   }
 
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    tenantRef
+  );
   const { data: tenant, error: tenantError } = await supabase
     .from("tenants")
     .select("id")
-    .eq("id", tenantId)
+    .eq(isUuid ? "id" : "slug", tenantRef)
     .single();
 
   if (tenantError || !tenant) {
@@ -29,7 +32,7 @@ export async function GET(
   const { data, error } = await supabase
     .from("v_tenant_entitlements")
     .select("*")
-    .eq("tenant_id", tenantId)
+    .eq("tenant_id", tenant.id)
     .single();
 
   if (error) {

@@ -2,54 +2,67 @@
 
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 
-export async function signInWithEmail(prevState: any, formData: FormData) {
-  const email = String(formData.get("email") || "").trim();
-  if (!email) {
-    return { ok: false, step: "validation", message: "Email required" };
-  }
+export type AuthFormState = {
+  ok: boolean;
+  message?: string;
+  error?: string;
+};
 
-  const h = await headers();
+function getOriginFromHeaders(h: Headers) {
   const xfProto = h.get("x-forwarded-proto") ?? "https";
   const xfHost = h.get("x-forwarded-host") ?? h.get("host");
-  const origin = `${xfProto}://${xfHost}`;
-  const redirectTo = `${origin}/auth/callback`;
+  return `${xfProto}://${xfHost}`;
+}
 
-  console.log("[signInWithEmail] START", {
-    email,
-    redirectTo,
-    origin,
-    xfProto,
-    xfHost,
-  });
+export async function signInWithPassword(
+  _prevState: AuthFormState | null,
+  formData: FormData
+): Promise<AuthFormState> {
+  const email = String(formData.get("email") || "").trim();
+  const password = String(formData.get("password") || "");
+
+  if (!email || !password) {
+    return { ok: false, error: "Email and password are required." };
+  }
 
   const supabase = await createClient();
-
-  const { error } = await supabase.auth.signInWithOtp({
+  const { error } = await supabase.auth.signInWithPassword({
     email,
-    options: { emailRedirectTo: redirectTo },
-  });
-
-  console.log("[signInWithEmail] RESULT", {
-    ok: !error,
-    error: error?.message || null,
-    step: error ? "otp_error" : "otp_sent",
+    password,
   });
 
   if (error) {
-    return {
-      ok: false,
-      step: "otp_error",
-      message: error.message,
-      debug: { origin, xfProto, xfHost, redirectTo },
-    };
+    return { ok: false, error: error.message };
+  }
+
+  redirect("/usage");
+}
+
+export async function requestPasswordReset(
+  _prevState: AuthFormState | null,
+  formData: FormData
+): Promise<AuthFormState> {
+  const email = String(formData.get("email") || "").trim();
+  if (!email) return { ok: false, error: "Email is required." };
+
+  const h = await headers();
+  const origin = getOriginFromHeaders(h);
+  const redirectTo = `${origin}/auth/callback?next=/auth/reset-password`;
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo,
+  });
+
+  if (error) {
+    return { ok: false, error: error.message };
   }
 
   return {
     ok: true,
-    step: "otp_sent",
-    message: "Check your email for login link.",
-    redirectTo,
-    debug: { origin, xfProto, xfHost, redirectTo },
+    message:
+      "If that email exists, a reset link has been sent. Check your inbox.",
   };
 }

@@ -84,12 +84,12 @@ export default function HairStylesClientPage({
   };
 
   return (
-    <div className="p-4 md:p-6">
+    <div className="glass-panel p-4 md:p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">Manage Hair Styles</h1>
+        <h1 className="text-3xl font-bold text-[var(--foreground)]">Manage Hair Styles</h1>
         <button 
           onClick={handleCreateNew} 
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-200 ease-in-out"
+          className="btn-primary-gradient rounded-lg px-4 py-2 font-bold shadow-md transition-all duration-200 ease-in-out"
           disabled={isPending}
         >
           {isPending ? 'Loading...' : 'Add New Style'}

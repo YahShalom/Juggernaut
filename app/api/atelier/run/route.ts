@@ -3,13 +3,19 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
 const runSchema = z.object({
-  product_category: z.string(),
-  size_value: z.string(),
-  fit_preference: z.string(),
-  style_keywords: z.array(z.string()).optional(),
-  color_preferences: z.array(z.string()).optional(),
-  budget_min: z.number().optional(),
-  budget_max: z.number().optional(),
+  product_category: z.string().optional(),
+  size_value: z.string().optional(),
+  fit_preference: z.string().optional(),
+  style_keywords: z
+    .union([z.array(z.string()), z.string()])
+    .optional()
+    .transform((v) => (typeof v === 'string' ? v.split(',').map((s) => s.trim()).filter(Boolean) : v)),
+  color_preferences: z
+    .union([z.array(z.string()), z.string()])
+    .optional()
+    .transform((v) => (typeof v === 'string' ? v.split(',').map((s) => s.trim()).filter(Boolean) : v)),
+  budget_min: z.coerce.number().optional(),
+  budget_max: z.coerce.number().optional(),
   session_id: z.string().optional(), // For revisions
   feedback_reason: z.string().optional(), // For revisions
 });
@@ -39,7 +45,7 @@ const mockRevisedRecommendation = {
 };
 
 export async function POST(req: Request) {
-  const supabase = createClient();
+  const supabase = await createClient();
   let current_session_id: string | undefined;
 
   try {
@@ -57,6 +63,26 @@ export async function POST(req: Request) {
 
     const { session_id, feedback_reason, ...inputs } = validatedInputs.data;
     current_session_id = session_id;
+
+    const isRevision = Boolean(current_session_id);
+    if (isRevision) {
+      if (!feedback_reason || !feedback_reason.trim()) {
+        return NextResponse.json(
+          { error: 'feedback_reason is required when session_id is provided' },
+          { status: 400 }
+        );
+      }
+    } else {
+      if (!inputs.product_category || !inputs.size_value || !inputs.fit_preference) {
+        return NextResponse.json(
+          {
+            error:
+              'product_category, size_value, and fit_preference are required for a new run',
+          },
+          { status: 400 }
+        );
+      }
+    }
     
     // @ts-ignore
     const tenantId = user.user_metadata.tenant_id;
@@ -64,7 +90,7 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "Tenant ID not found for user" }, { status: 400 });
     }
 
-    if (current_session_id && feedback_reason) {
+    if (isRevision) {
         // This is a revision request
         console.log(`Revising session ${current_session_id} with feedback: ${feedback_reason}`);
         await supabase.from('atelier_sessions').update({ updated_at: new Date().toISOString() }).eq('id', current_session_id);

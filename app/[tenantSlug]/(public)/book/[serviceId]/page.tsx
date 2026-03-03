@@ -1,7 +1,7 @@
 import { createTenantedSupabaseServerClient } from '@/lib/supabase/tenanted-server';
 
 export default async function BookServicePage({ params }: { params: { serviceId: string } }) {
-  const { supabase, tenantId } = createTenantedSupabaseServerClient();
+  const { supabase, tenantId } = await createTenantedSupabaseServerClient();
 
   const { data: offering } = await supabase
     .from('offerings')

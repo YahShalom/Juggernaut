@@ -4,7 +4,7 @@ import { saveBrand } from './actions';
 import SettingsForm from './SettingsForm';
 
 export default async function SettingsPage({ params }: { params: { tenantSlug: string } }) {
-  const { supabase, tenant } = createTenantedSupabaseServerClient();
+  const { supabase, tenant } = await createTenantedSupabaseServerClient();
 
   if (!tenant) {
     return <div>Tenant not found</div>;
@@ -13,8 +13,8 @@ export default async function SettingsPage({ params }: { params: { tenantSlug: s
   const skin = getSkin(tenant);
 
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-8">Manage Brand</h1>
+    <div className="glass-panel p-8">
+      <h1 className="mb-8 text-3xl font-bold text-[var(--foreground)]">Manage Brand</h1>
       <SettingsForm skin={skin} onSave={saveBrand} tenantSlug={params.tenantSlug} />
     </div>
   );
